@@ -5,21 +5,24 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using SalesWeb.Services;
 
 namespace SalesWeb.Controllers
 {
     public class SellersController : Controller
     {
-        private readonly ILogger<SellersController> _logger;
+        private readonly SellerService _sellerService;
 
-        public SellersController(ILogger<SellersController> logger)
+        public SellersController(SellerService sellerService)
         {
-            _logger = logger;
+            _sellerService = sellerService;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            var sellers = await _sellerService.FindAll();
+
+            return View(sellers);
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

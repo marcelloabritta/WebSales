@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using SalesWeb.Data;
+using SalesWeb.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 var connectionString = builder.Configuration.GetConnectionString("SalesWebContext");
@@ -15,6 +16,7 @@ builder.Services.AddDbContext<SalesWebContext>(options =>
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddScoped<SeedingService>();
+builder.Services.AddScoped<SellerService>();
 
 
 var app = builder.Build();
