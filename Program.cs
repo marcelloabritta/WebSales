@@ -14,9 +14,19 @@ builder.Services.AddDbContext<SalesWebContext>(options =>
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
+builder.Services.AddScoped<SeedingService>();
 
 
 var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        var seedingService = scope.ServiceProvider.GetRequiredService<SeedingService>();
+        await seedingService.SeedASync();
+    }
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
