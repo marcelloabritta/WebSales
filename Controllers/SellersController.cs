@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using SalesWeb.Models;
 using SalesWeb.Models.ViewModels;
 using SalesWeb.Services;
+using SalesWeb.Services.Exceptions;
 
 namespace SalesWeb.Controllers
 {
@@ -84,6 +85,50 @@ namespace SalesWeb.Controllers
             }
 
             return View(seller);
+        }
+
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var seller = await _sellerService.FindById(id.Value);
+
+            if (seller == null)
+            {
+                return NotFound();
+            }
+
+            List<Department> departments = await _departmentService.FindAll();
+
+            SellerFormViewModel viewModel = new SellerFormViewModel { Seller = seller, Departments = departments };
+
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, Seller seller)
+        {
+            if (id != seller.Id)
+            {
+                return BadRequest();
+            }
+            try
+            {
+                await _sellerService.Update(seller);
+                return RedirectToAction(nameof(Index));
+            }
+            catch (NotFoundException)
+            {
+                return NotFound();
+            }
+            catch (DbConcurrencyException)
+            {
+                return BadRequest();
+            }
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
