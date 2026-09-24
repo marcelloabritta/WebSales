@@ -34,7 +34,8 @@ namespace SalesWeb.Services
 
         public async Task Update(Seller seller)
         {
-            if (!_context.Sellers.Any(s => s.Id == seller.Id))
+            bool hasAny = await _context.Sellers.AnyAsync(s => s.Id == seller.Id);
+            if (!hasAny)
             {
                 throw new NotFoundException("Id not found");
             }
@@ -53,9 +54,16 @@ namespace SalesWeb.Services
 
         public async Task Remove(int id)
         {
-            var seller = await _context.Sellers.FindAsync(id);
-            _context.Sellers.Remove(seller);
-            await _context.SaveChangesAsync();
+            try
+            {
+                var seller = await _context.Sellers.FindAsync(id);
+                _context.Sellers.Remove(seller);
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                throw new IntegrityException("Can´t delete seller because he/she has sales");
+            }
         }
     }
 }
